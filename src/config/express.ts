@@ -12,6 +12,7 @@ import { UserController } from "../controllers/UserController.js";
 import { ChannelController } from "../controllers/ChannelController.js";
 import { ChannelResourceController } from "../controllers/channelResourceController.js";
 import { ChatController } from "../controllers/ChatController.js";
+import cors from "cors";
 
 const app = createExpressServer({
   cors: true,
@@ -29,7 +30,7 @@ const app = createExpressServer({
   defaultErrorHandler: false,
   authorizationChecker: authorizationChecker,
 });
-
+app.use(cors());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default app;
