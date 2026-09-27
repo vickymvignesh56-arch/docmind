@@ -82,7 +82,7 @@ export class ChannelResourceController {
     @Res() res: any,
   ) {
     try {
-      const userId = req.user.id;
+      const userId = req.userId;
       const existchannel = await channelService.findBychannelIdAndUserId(
         userId,
         channelId,
@@ -299,20 +299,42 @@ export class ChannelResourceController {
       channelId,
     );
     if (!channel) {
-      throw new BadRequestError("Channel not found");
+      return res.status(404).json({
+        status: 0,
+        message: "Channel not found",
+      });
     }
     const resource = await channelResourceService.findByIdandChannelId(
       channelId,
       resourceId,
     );
     if (!resource) {
-      throw new BadRequestError("Resource not found");
+      return res.status(404).json({
+        status: 0,
+        message: "Resource not found",
+      });
     }
     try {
       await fs.access(resource.filePath);
     } catch {
-      throw new BadRequestError("File not found");
+      return res.status(404).json({
+        status: 0,
+        message: "File not found",
+      });
     }
-    return res.download(resource.filePath, resource.fileName);
+    const downloadName =
+      (resource.additionalInfo as any)?.originalName || resource.fileName;
+
+    return new Promise((resolve) => {
+      res.download(resource.filePath, downloadName, (err: any) => {
+        if (err && !res.headersSent) {
+          res.status(404).json({
+            status: 0,
+            message: "File not found",
+          });
+        }
+        resolve(res);
+      });
+    });
   }
 }

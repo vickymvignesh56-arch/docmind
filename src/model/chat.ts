@@ -42,14 +42,6 @@ export class Chat {
   })
   resourceId!: string[];
 
-  @ManyToOne(() => ChannelResource, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({
-    name: "resourceId",
-  })
-  resource!: ChannelResource;
-
   @Column({
     type: "boolean",
     nullable: true,

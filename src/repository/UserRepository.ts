@@ -3,6 +3,11 @@ import { AppDataSource } from "../config/database.js";
 import type { UserRequest } from "../dto/user/UserRequest.js";
 import type { UpdateUserRequest } from "../dto/user/UpdateUserRequest.js";
 
+export type UpdateUserPassword = {
+  oldPassword: string;
+  newPassword: string;
+};
+
 export class UserRepository {
   private repository;
   constructor() {
@@ -18,6 +23,17 @@ export class UserRepository {
 
   findByEmail(email: string): Promise<User | null> {
     return this.repository.findOne({ where: { email } });
+  }
+
+  async updatePassword(userId: string, password: string) {
+    return await this.repository.update(
+      {
+        id: userId,
+      },
+      {
+        password: password,
+      },
+    );
   }
 
   createUser(user: UserRequest): Promise<User> {

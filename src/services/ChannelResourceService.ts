@@ -62,8 +62,8 @@ export class ChannelResourceService {
       return null;
     }
     const resource = await this.repository.findByIdandChannelId(
-      channelId,
       resourceId,
+      channelId,
     );
     if (!resource) {
       return null;

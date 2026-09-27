@@ -11,6 +11,8 @@ import {
 } from "routing-controllers";
 import { userService } from "../services/UserService.js";
 import type { UpdateUserRequest } from "../dto/user/UpdateUserRequest.js";
+import { comparePassword, hashPassword } from "../utils/bcrypt.js";
+import type { UpdateUserPassword } from "../repository/UserRepository.js";
 @Authorized()
 @JsonController("/user-profile")
 export class UserController {
@@ -102,6 +104,80 @@ export class UserController {
       status: 1,
       message: "User profile updated successfully",
       data: updatedUser,
+    });
+  }
+
+  /**
+   * @openapi
+   * /api/user-profile/change-password:
+   *   put:
+   *     tags:
+   *       - User Profile
+   *     summary: Update user profile
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/UpdateUserRequest"
+   *     responses:
+   *       200:
+   *         description: User profile updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UserProfileResponse"
+   *       400:
+   *         $ref: "#/components/responses/BadRequest"
+   *       401:
+   *         $ref: "#/components/responses/Unauthorized"
+   *       500:
+   *         $ref: "#/components/responses/InternalServerError"
+   */
+  @Put("/change-password")
+  async changePassword(
+    @Body({ validate: true }) body: UpdateUserPassword,
+    @Req() req: any,
+    @Res() res: any,
+  ) {
+    const userId = req.userId;
+    const { oldPassword, newPassword } = body;
+    if (!oldPassword || !oldPassword.toString().trim()) {
+      return res.status(400).json({
+        status: 0,
+        message: "Current password is required",
+      });
+    }
+    if (!newPassword || !newPassword.toString().trim()) {
+      return res.status(400).json({
+        status: 0,
+        message: "New password is required",
+      });
+    }
+    const user = await userService.findByUserId(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: 0,
+        message: "User not found",
+      });
+    }
+    const isMatch = await comparePassword(
+      oldPassword.toString().trim(),
+      user.password,
+    );
+    if (!isMatch) {
+      return res.status(400).json({
+        status: 0,
+        message: "Current password is incorrect",
+      });
+    }
+    const hashed = await hashPassword(newPassword.toString().trim());
+    await userService.updatePassword(user.id, hashed);
+    return res.status(200).json({
+      status: 1,
+      message: "Password updated successfully",
     });
   }
 }

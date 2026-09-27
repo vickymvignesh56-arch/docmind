@@ -63,6 +63,10 @@ export class UserService {
     return await this.userRepository.findById(userId);
   }
 
+  async updatePassword(userId: string, password: string) {
+    return this.userRepository.updatePassword(userId, password);
+  }
+
   async updateProfile(userId: string, userRequest: UpdateUserRequest) {
     const users = await this.userRepository.findById(userId);
     if (!users) {

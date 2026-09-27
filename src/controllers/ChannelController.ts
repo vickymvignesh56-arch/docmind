@@ -132,7 +132,7 @@ export class ChannelController {
    *       500:
    *         $ref: "#/components/responses/InternalServerError"
    */
-  @Get("/:id")
+  @Get("/:channelId")
   async getChannelById(
     @Param("channelId") channelId: string,
     @Req() req: any,
