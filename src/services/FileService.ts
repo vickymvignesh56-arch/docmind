@@ -42,8 +42,7 @@ export class FileService {
     const folderName = path.join(storage.uploadDir, channelId);
     await fs.mkdir(folderName, { recursive: true });
     const safeOriginalName = path.basename(file.originalname);
-    const uniqueId = crypto.randomUUID();
-    const fileName = `${uniqueId}-${safeOriginalName}`;
+    const fileName = safeOriginalName;
     const filePath = path.join(folderName, fileName);
     await fs.writeFile(filePath, file.buffer);
     try {

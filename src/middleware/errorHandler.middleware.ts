@@ -7,7 +7,11 @@ import {
 
 @Middleware({ type: "after" })
 export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
-  error(error: any, _req: Request, res: Response, _next: NextFunction): void {
+  error(error: any, _req: Request, res: Response, next: NextFunction): void {
+    if (res.headersSent) {
+      next(error);
+      return;
+    }
     if (error instanceof HttpError) {
       if (error.httpCode === 400) {
         res.status(400).json({

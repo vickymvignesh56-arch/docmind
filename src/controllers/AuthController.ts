@@ -46,9 +46,15 @@ export class AuthController {
     @Res() res: any,
   ): Promise<any> {
     const user = await userService.registerUser(userRequest);
+    const payload = {
+      userId: user.id,
+    };
+    const token = await Jwt.sign(payload, authConfig.jwtSecretKey);
     return res.status(201).json({
       status: 1,
       message: "User registered successfully",
+      token: token,
+      data: user,
       user: {
         id: user.id,
         name: user.name,

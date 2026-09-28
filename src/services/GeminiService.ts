@@ -21,7 +21,10 @@ export class GeminiService implements LLMClient {
     }
     const contents = buildPrompt(input);
     try {
+      console.log("decryptedApiKey", decryptedApiKey);
       const gemini = createGeminiClient(decryptedApiKey);
+      console.log("provider.chatModel: ", provider.chatModel);
+
       const response = await gemini.models.generateContent({
         model: provider.chatModel,
         contents,
@@ -34,7 +37,9 @@ export class GeminiService implements LLMClient {
         content,
       };
     } catch (err) {
-      throw new Error("Failed to generate response from Gemini");
+      console.error("❌ Gemini generateContent failed");
+      console.error("Error:", err);
+      throw new Error("Failed to generate response from Gemini" + err);
     }
   }
 

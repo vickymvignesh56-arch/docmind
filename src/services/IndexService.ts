@@ -2,6 +2,7 @@ import { qdrantClient } from "../config/qdrant.js";
 import { qdrantServices, QdrantServices } from "./QdrantService.js";
 import { EmbeddingService, embeddingService } from "./EmbeddingService.js";
 import { chunkText } from "../utils/text-chunker.js";
+import crypto from "crypto";
 export class IndexService {
   constructor(
     private readonly qdrantServices: QdrantServices,
@@ -23,11 +24,23 @@ export class IndexService {
           userId,
           chunk.text,
         );
-        await qdrantClient.upsert(collectionName, {
+        const hash = crypto
+          .createHash("sha256")
+          .update(`${resourceId}-${chunk.index}`)
+          .digest("hex");
+
+        const pointId = [
+          hash.slice(0, 8),
+          hash.slice(8, 12),
+          hash.slice(12, 16),
+          hash.slice(16, 20),
+          hash.slice(20, 32),
+        ].join("-");
+        const result = await qdrantClient.upsert(collectionName, {
           wait: true,
           points: [
             {
-              id: `${resourceId}-${chunk.index}`,
+              id: pointId,
               vector: embedding,
               payload: {
                 userId,
@@ -41,6 +54,8 @@ export class IndexService {
             },
           ],
         });
+        console.log("✅ QDRANT UPSERT SUCCESS");
+        console.log("QDRANT RESULT:", result);
       }
     } catch (error) {
       console.error("Failed to ingest resource:", error);
@@ -81,7 +96,7 @@ export class IndexService {
           {
             key: "resourceId",
             match: {
-              value: resourceId,
+              any: resourceId,
             },
           },
         ],

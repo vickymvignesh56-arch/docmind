@@ -41,6 +41,7 @@ export class FileHandler implements ChannelHandler {
       );
     } catch (error) {
       console.error("Error processing resource:", error);
+      throw error;
     }
   }
 

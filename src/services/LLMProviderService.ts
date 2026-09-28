@@ -52,6 +52,7 @@ export class LLMProviderService {
       const provider = new LLMProvider();
       provider.userId = userId;
       provider.provider = llmProviderRequest.provider;
+      provider.slug = llmProviderRequest.provider.toLowerCase();
       provider.apiKey = encrypt(apiKey);
       provider.embeddingModel = llmProviderRequest.embeddingModel;
       provider.chatModel = llmProviderRequest.chatModel;
@@ -78,6 +79,7 @@ export class LLMProviderService {
       llmProviderRequest.embeddingModel ?? existingProvider.embeddingModel;
     existingProvider.chatModel =
       llmProviderRequest.chatModel ?? existingProvider.chatModel;
+    existingProvider.slug = llmProviderRequest.provider.toLowerCase();
     existingProvider.isActive = false;
     const savedProvider = await this.llmProvider.create(existingProvider);
     return this.toResponse(savedProvider);
