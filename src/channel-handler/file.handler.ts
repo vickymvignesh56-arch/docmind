@@ -49,7 +49,7 @@ export class FileHandler implements ChannelHandler {
     userId: string,
     resourceId: string,
   ): Promise<void> {
-    return await indexService.clearIndexPointsResource(userId, resourceId);
+    await indexService.clearIndexPointsResource(userId, resourceId);
   }
 
   private async extractText(

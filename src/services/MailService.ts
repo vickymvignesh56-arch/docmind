@@ -10,7 +10,7 @@ export class MailService {
     await mailTransporter.sendMail({
       from: mailConfig.from,
       to: emailId,
-      subject: "Welcome to Ragfish 🎉",
+      subject: "Welcome to Docmind 🎉",
       html,
     });
   }
