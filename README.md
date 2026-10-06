@@ -398,48 +398,6 @@ These services provide persistent storage, vector search, and background job pro
 
 ---
 
-## 📡 API Overview
-
-### Authentication
-
-```http
-POST /api/auth/login
-POST /api/auth/register
-```
-
-### Resources
-
-```http
-POST   /api/channels/:channelId/resources
-GET    /api/channels/:channelId/resources
-DELETE /api/channels/:channelId/resources/:resourceId
-```
-
-### Chat
-
-```http
-POST /api/channels/:channelId/chat
-```
-
-### User Profile
-
-```http
-POST /api/user-profile/change-password
-```
-
-### LLM Providers
-
-DocMind also provides APIs for managing LLM provider configuration.
-
-```http
-GET    /api/llm-providers
-POST   /api/llm-providers
-PUT    /api/llm-providers/:providerId
-DELETE /api/llm-providers/:providerId
-```
-
----
-
 ## 🎯 Main Goal
 
 The main goal of DocMind is to provide a flexible AI document assistant that can work with multiple LLM providers while keeping the document retrieval and RAG pipeline independent from the selected model provider.
