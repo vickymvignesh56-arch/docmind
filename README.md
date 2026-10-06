@@ -2,7 +2,9 @@
 
 **DocMind** is an AI-powered document chat application that allows users to upload documents and ask questions based on their uploaded content.
 
-It uses **LLM, Embeddings, Vector Search, and RAG (Retrieval-Augmented Generation)** to understand documents and generate context-aware answers.
+It uses **LLMs, Embeddings, Vector Search, and RAG (Retrieval-Augmented Generation)** to understand documents and generate context-aware answers.
+
+DocMind supports multiple LLM providers, allowing users to configure and use **Google Gemini, OpenAI, and Anthropic Claude** for AI-powered document conversations.
 
 ---
 
@@ -13,62 +15,121 @@ It uses **LLM, Embeddings, Vector Search, and RAG (Retrieval-Augmented Generatio
 * 🧠 Generate embeddings for document chunks
 * 🔎 Semantic search using vector database
 * 💬 Chat with uploaded documents
-* 🤖 AI-powered answers using Gemini
+* 🤖 Multi-LLM support
+* 🔵 Google Gemini
+* 🟢 OpenAI
+* 🟣 Anthropic Claude
 * 📚 RAG-based question answering
 * 🔐 User authentication
-* ⚡ Fast and scalable API architecture
+* 🔑 Secure API key management
+* ⚡ Background document processing
 * 🗂️ Manage uploaded resources
+* 🔄 Configurable LLM provider and models
+* 📊 API documentation with Swagger
 
 ---
 
 ## 🏗️ Architecture
 
 ```text
-                ┌─────────────────┐
-                │      User       │
-                └────────┬────────┘
+                         ┌─────────────────┐
+                         │      User       │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │   DocMind UI    │
+                         │     (React)     │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │   Backend API   │
+                         │ Node.js/Express │
+                         └────────┬────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │                           │
+                    ▼                           ▼
+             ┌─────────────┐             ┌─────────────┐
+             │  Document   │             │    Chat     │
+             │   Upload    │             │    API      │
+             └──────┬──────┘             └──────┬──────┘
+                    │                           │
+                    ▼                           ▼
+             ┌─────────────┐             ┌─────────────┐
+             │   Chunking  │             │   Retrieve  │
+             └──────┬──────┘             │  Documents  │
+                    │                    └──────┬──────┘
+                    ▼                           │
+             ┌─────────────┐                   │
+             │ Embeddings  │                   │
+             └──────┬──────┘                   │
+                    │                           │
+                    ▼                           ▼
+                    └──────────────► Qdrant ◄──┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │   LLM Service   │
+                              └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+             ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+             │   Gemini    │   │   OpenAI    │   │  Anthropic  │
+             │     LLM     │   │     LLM     │   │    Claude   │
+             └──────┬──────┘   └──────┬──────┘   └──────┬──────┘
+                    │                  │                  │
+                    └──────────────────┼──────────────────┘
+                                       │
+                                       ▼
+                              AI Generated Answer
+```
+
+---
+
+## 🤖 Supported LLM Providers
+
+DocMind is designed with a provider-based architecture so that different LLM providers can be integrated without changing the core chat and RAG logic.
+
+### Google Gemini
+
+Used for:
+
+* Chat completion
+* Document-based question answering
+* Embeddings
+
+### OpenAI
+
+Used for:
+
+* Chat completion
+* Document-based question answering
+* Embeddings
+
+### Anthropic Claude
+
+Used for:
+
+* Chat completion
+* Document-based question answering
+
+The active provider and model can be configured through the application settings.
+
+```text
+                    LLM Service
                          │
+          ┌──────────────┼──────────────┐
+          │              │              │
+          ▼              ▼              ▼
+       Gemini          OpenAI        Anthropic
+          │              │              │
+          └──────────────┼──────────────┘
                          ▼
-                ┌─────────────────┐
-                │   DocMind UI    │
-                │     (React)     │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │   Backend API   │
-                │ Node.js/Express │
-                └───────┬─────────┘
-                        │
-             ┌──────────┴──────────┐
-             │                     │
-             ▼                     ▼
-      ┌─────────────┐       ┌─────────────┐
-      │  Document   │       │    Chat     │
-      │   Upload    │       │    API      │
-      └──────┬──────┘       └──────┬──────┘
-             │                     │
-             ▼                     ▼
-      ┌─────────────┐       ┌─────────────┐
-      │   Chunking  │       │   Retrieve  │
-      └──────┬──────┘       │  Documents  │
-             │              └──────┬──────┘
-             ▼                     │
-      ┌─────────────┐              │
-      │ Embeddings  │              │
-      └──────┬──────┘              │
-             │                     │
-             ▼                     ▼
-             └──────────► Qdrant ◄─┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │    Gemini   │
-                    │     LLM     │
-                    └──────┬──────┘
-                           │
-                           ▼
-                    AI Generated Answer
+                  Generated Response
 ```
 
 ---
@@ -96,7 +157,11 @@ Similarity Search
       ↓
 Retrieve Relevant Chunks
       ↓
-Send Context + Question to Gemini
+Build Context
+      ↓
+LLM Provider
+      ↓
+Gemini / OpenAI / Anthropic
       ↓
 Generate Answer
 ```
@@ -126,14 +191,21 @@ Generate Answer
 
 * PostgreSQL
 
-### AI / RAG
+### AI / LLM
 
 * Google Gemini
+* OpenAI
+* Anthropic Claude
+
+### RAG / Vector Search
+
 * Embeddings
 * Qdrant Vector Database
+* Semantic Search
 * Retrieval-Augmented Generation (RAG)
+* Text Chunking
 
-### Other Technologies
+### Infrastructure & Tools
 
 * JWT Authentication
 * Redis
@@ -159,6 +231,14 @@ DocMind/
 │   ├── src/
 │   │   ├── controllers/
 │   │   ├── services/
+│   │   │   ├── llm/
+│   │   │   │   ├── GeminiService
+│   │   │   │   ├── OpenAIService
+│   │   │   │   └── AnthropicService
+│   │   │   ├── ChatService
+│   │   │   ├── EmbeddingService
+│   │   │   └── ResourceService
+│   │   │
 │   │   ├── entities/
 │   │   ├── routes/
 │   │   ├── middleware/
@@ -178,7 +258,7 @@ DocMind/
 
 The user uploads a document through the DocMind interface.
 
-The backend receives the file and processes its content.
+The backend receives the file and starts the document processing pipeline.
 
 ### 2. Text Extraction
 
@@ -188,15 +268,15 @@ The uploaded document is converted into readable text.
 
 Large documents are divided into smaller text chunks.
 
-This makes the content easier to embed and retrieve efficiently.
+This makes the content easier to process, embed, and retrieve efficiently.
 
 ### 4. Embeddings
 
-Each chunk is converted into a numerical vector representation using an embedding model.
+Each chunk is converted into a numerical vector representation using the configured embedding model.
 
 ### 5. Vector Storage
 
-The generated embeddings and their related metadata are stored in **Qdrant**.
+The generated embeddings and their metadata are stored in **Qdrant**.
 
 ### 6. User Question
 
@@ -208,15 +288,53 @@ The question is converted into an embedding and searched against Qdrant.
 
 The most relevant document chunks are retrieved.
 
-### 8. Gemini Generation
+### 8. Context Building
 
-The retrieved context and user's question are sent to Gemini.
+The retrieved chunks are combined with the user's question to create the context for the LLM.
 
-Gemini generates the final answer based on the retrieved document context.
+### 9. LLM Generation
+
+The request is sent to the configured active LLM provider:
+
+```text
+Gemini
+   OR
+OpenAI
+   OR
+Anthropic
+```
+
+The selected provider generates the final answer based on the retrieved document context.
 
 ---
 
-## 🔐 Authentication
+## 🔀 Multi-Provider Architecture
+
+DocMind separates the LLM integration from the main chat and RAG logic.
+
+```text
+                    ChatService
+                         │
+                         ▼
+                    LLMService
+                         │
+                    Provider Factory
+                         │
+          ┌──────────────┼──────────────┐
+          │              │              │
+          ▼              ▼              ▼
+       Gemini          OpenAI        Anthropic
+       Service         Service         Service
+          │              │              │
+          ▼              ▼              ▼
+      Gemini API      OpenAI API    Claude API
+```
+
+This architecture makes it easier to add additional LLM providers in the future without rewriting the core application logic.
+
+---
+
+## 🔐 Authentication & Security
 
 DocMind uses token-based authentication.
 
@@ -232,7 +350,7 @@ Backend Validation
 Protected API
 ```
 
-Protected resources can only be accessed by authenticated users.
+API keys for configured LLM providers are securely handled by the backend rather than being exposed directly to the frontend.
 
 ---
 
@@ -256,8 +374,11 @@ REST API
  ├── Redis
  │      └── Queue Management
  │
- └── Gemini
-        └── Embedding / AI Response
+ └── LLM Providers
+        │
+        ├── Gemini
+        ├── OpenAI
+        └── Anthropic
 ```
 
 ---
@@ -273,7 +394,7 @@ Docker
  └── Redis
 ```
 
-This makes the development environment easier to configure and reproduce.
+These services provide persistent storage, vector search, and background job processing.
 
 ---
 
@@ -306,13 +427,24 @@ POST /api/channels/:channelId/chat
 POST /api/user-profile/change-password
 ```
 
+### LLM Providers
+
+DocMind also provides APIs for managing LLM provider configuration.
+
+```http
+GET    /api/llm-providers
+POST   /api/llm-providers
+PUT    /api/llm-providers/:providerId
+DELETE /api/llm-providers/:providerId
+```
+
 ---
 
 ## 🎯 Main Goal
 
-The main goal of DocMind is to provide a simple interface for interacting with documents using modern AI technologies.
+The main goal of DocMind is to provide a flexible AI document assistant that can work with multiple LLM providers while keeping the document retrieval and RAG pipeline independent from the selected model provider.
 
-Instead of manually searching through large documents, users can simply ask questions and receive answers based on the relevant document content.
+Users can upload documents, ask questions, retrieve relevant information, and receive AI-generated answers using their configured LLM provider.
 
 ---
 
@@ -323,12 +455,15 @@ This project helped me understand and implement:
 * REST API development
 * Authentication and authorization
 * File processing
+* Text extraction
 * Text chunking
 * Embeddings
 * Vector databases
 * Semantic search
 * RAG architecture
 * LLM integration
+* Multi-provider LLM architecture
+* Provider abstraction
 * Prompt engineering
 * Background job processing
 * Redis and BullMQ
@@ -336,22 +471,24 @@ This project helped me understand and implement:
 * TypeORM
 * Docker
 * API documentation
+* Secure API key handling
 
 ---
 
 ## 🚀 Future Improvements
 
-* Multi-model LLM support
 * Streaming AI responses
-* Better document parsing
+* Advanced document parsing
 * Conversation memory
 * Advanced RAG techniques
 * Hybrid search
 * Reranking
 * Knowledge Graph integration
 * Agentic document workflows
+* Additional LLM providers
 * Production deployment
 * Monitoring and observability
+* Evaluation and RAG quality metrics
 
 ---
 
